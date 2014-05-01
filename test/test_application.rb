@@ -18,7 +18,7 @@ class TestApp < Rulers::Application
 
   	def test_request_content_type
   	  get "/"
-  	  assert last_response.content_type['text/html']
+  	  asserft last_response.content_type['text/html']
   	end
 
   end
