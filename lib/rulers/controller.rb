@@ -1,3 +1,4 @@
+require 'erubis'
 module Rulers
   class Controller
   	def initialize(env)
@@ -7,5 +8,19 @@ module Rulers
   	def env
   	  @env
   	end
+
+  	def render(view_name, locals={})
+  	  filename = File.join "app", "views", controller_name, "#{view_name}.html.erb"
+  	  template = File.read filename
+  	  eruby = Erubis::Eruby.new(template)
+      locals = locals.merge(:@my_var => self.instance_variable_get(:@my_var))
+  	  eruby.result locals.merge(:env => env)
+  	end
+
+    def controller_name
+      klass = self.class
+      klass = klass.to_s.gsub(/Controller$/, "")
+      Rulers.to_underscore klass
+    end
   end
 end
