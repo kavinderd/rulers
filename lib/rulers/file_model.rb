@@ -31,6 +31,13 @@ module Rulers
   	  	end
   	  end
 
+      def self.find_all_by(attribute, value)
+        puts "value"
+        files = FileModel.all
+        puts "files"
+        return files.select {|f| f["#{attribute}"]  ==  value}
+      end
+
   	  def self.all
   	  	files = Dir["db/quotes/*.json"]
   	  	files.map {|f| FileModel.new f }
@@ -74,6 +81,27 @@ TEMPLATE
         end
         puts "hello"
         self
+      end
+
+      def self.method_missing(m, *args, &block)
+        puts "method missing"
+        if m =~ /^find_all_by_(.*)/
+          puts "matches #{m}"
+          puts "my arg = #{args[0]}"
+          attribute = m.to_s.gsub("find_all_by_", "")
+          puts "#{attribute}"
+          self.find_all_by(attribute, args[0])
+        else
+          super
+        end
+      end
+
+      def self.respond_to?(m)
+        if m =~ /^find_all_by_(.*)/
+          true
+        else
+          super
+        end
       end
 
   	end
