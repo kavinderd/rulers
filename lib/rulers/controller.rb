@@ -1,5 +1,6 @@
 require 'erubis'
 require "rulers/file_model"
+require "rack/request"
 
 module Rulers
   class Controller
@@ -13,12 +14,9 @@ module Rulers
   	  @env
   	end
 
-  	def render(view_name, locals={})
-  	  filename = File.join "app", "views", controller_name, "#{view_name}.html.erb"
-  	  template = File.read filename
-  	  eruby = Erubis::Eruby.new(template)
-      locals = locals.merge(:@my_var => self.instance_variable_get(:@my_var))
-  	  eruby.result locals.merge(:env => env)
+  	def render_view(view_name, locals={})
+      template = Rulers::View.new(action: view_name, controller: self)
+  	  template.render
   	end
 
     def controller_name
@@ -26,5 +24,30 @@ module Rulers
       klass = klass.to_s.gsub(/Controller$/, "")
       Rulers.to_underscore klass
     end
+
+    def request
+      @request ||= Rack::Request.new(@env)
+    end
+
+    def params
+      request.params
+    end
+
+    def response(text, status=200, headers={})
+      raise "Already responded!" if @response
+      puts "controller.response called"
+      a = [text].flatten
+      @response = Rack::Response.new(a, status, headers)
+    end
+
+    def get_response
+      @response
+    end
+
+    def render(*args)
+      puts "calling render"
+      response(render_view(*args))
+    end
+
   end
 end

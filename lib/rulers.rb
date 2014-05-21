@@ -4,26 +4,26 @@ require "rulers/util"
 require "rulers/dependencies"
 require "rulers/controller"
 require "rulers/file_model"
+require "rulers/view"
 
 module Rulers
   class Application
+
   	def call(env)
   	  if env['PATH_INFO'] == '/favicon.ico'
   	  	return [404, 
   	  		{'Content-Type' => 'text/html'}, []]
-  	  elsif env['PATH_INFO'] == '/'
-  	  	return [302, {'Location' => '/quotes/a_quote'}, ['redirecting']]
-  	  end
-
+      end
   	  klass, act = get_controller_and_action(env)
   	  controller = klass.new(env)
-  	  begin
-  	    text = controller.send(act)
+      text = controller.send(act)
+      if controller.get_response
+        st, hd, rs = controller.get_response.to_a
+        [st, hd, [rs.body].flatten]
+      else
+        
   	    [200, {'Content-Type' => 'text/html'},
-          [text]]
-      rescue Exception => e
-      	[500, {'Content-Type' => 'text/html'},
-          ["Error"]]
+          controller.render(act)]
       end
   	end
   end
