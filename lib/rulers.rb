@@ -6,6 +6,7 @@ require "rulers/controller"
 require "rulers/file_model"
 require "rulers/view"
 
+
 module Rulers
   class Application
 
